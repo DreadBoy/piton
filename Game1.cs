@@ -6,6 +6,8 @@ namespace piton
 {
     public class Game1 : Game
     {
+        private Texture2D _spritesheet;
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
@@ -28,6 +30,7 @@ namespace piton
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            _spritesheet = Content.Load<Texture2D>("Textures");
         }
 
         protected override void Update(GameTime gameTime)
@@ -45,7 +48,10 @@ namespace piton
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+            _spriteBatch.Draw(_spritesheet, new Vector2(0, 0), new Rectangle(384 * 2, 0, 384, 384), Color.White, 0,
+                Vector2.Zero, Vector2.One * 0.5f, SpriteEffects.None, 0);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
