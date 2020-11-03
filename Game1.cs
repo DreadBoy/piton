@@ -13,11 +13,15 @@ namespace piton
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        private const int TextureSize = 384;
         private const int TileSize = 32;
         private const int GridSize = 30;
+        private const int UpdateInterval = 200;
 
-        private List<Tile> _grid;
-        private readonly Grass _grass = new Grass();
+        private int _timer;
+        private readonly (int, int) _grass = (4, 0);
+        private readonly List<int> _snake;
+        private readonly SnakeDraw _snakeDraw = new SnakeDraw(GridSize);
 
 
         public Game1()
@@ -26,10 +30,17 @@ namespace piton
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            _grid = Enumerable.Repeat<Tile>(null, GridSize * GridSize).ToList();
-            _grid[GridSize] = new SnakeTail();
-            _grid[GridSize + 1] = new SnakeBody();
-            _grid[GridSize + 2] = new SnakeHead();
+            _snake = new List<int>
+            {
+                GridSize * 4 + 4,
+                GridSize * 4 + 3,
+                GridSize * 4 + 2,
+                GridSize * 3 + 2,
+                GridSize * 2 + 2,
+                GridSize + 2,
+                GridSize + 1,
+                GridSize,
+            };
         }
 
         protected override void Initialize()
@@ -65,23 +76,23 @@ namespace piton
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            for (int i = 0; i < _grid.Count; i++)
-            {
-                DrawTile(new Vector2(i % GridSize, (int) Math.Floor((double) i / GridSize)), _grass.sprite);
-                if (_grid[i] != null)
-                    DrawTile(new Vector2(i % GridSize, (int) Math.Floor((double) i / GridSize)), _grid[i].sprite);
-            }
+            for (var i = 0; i < GridSize * GridSize; i++)
+                // ReSharper disable once PossibleLossOfFraction
+                DrawTile(new Vector2(i % GridSize, i / GridSize), _grass);
 
+            for (var i = 0; i < _snake.Count; i++)
+                // ReSharper disable once PossibleLossOfFraction
+                DrawTile(new Vector2(_snake[i] % GridSize, _snake[i] / GridSize),
+                    _snakeDraw.GetSprite(_snake, i), _snakeDraw.GetRotation(_snake, i) * (float) Math.PI / 2);
             _spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
-        private void DrawTile(Vector2 position, Vector2 source)
+        private void DrawTile(Vector2 position, (int x, int y) source, float rotation = 0)
         {
-            _spriteBatch.Draw(_spritesheet, position * TileSize,
-                new Rectangle(384 * (int) source.X, 385 * (int) source.Y, 384, 384),
-                Color.White, 0, Vector2.Zero, Vector2.One / 384f * TileSize,
+            _spriteBatch.Draw(_spritesheet, position * TileSize + Vector2.One * TileSize * 0.5f,
+                new Rectangle(TextureSize * source.x, 385 * source.y, TextureSize, TextureSize),
+                Color.White, rotation, Vector2.One * 0.5f * TextureSize, Vector2.One / TextureSize * TileSize,
                 SpriteEffects.None, 0);
         }
     }
