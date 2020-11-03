@@ -6,11 +6,11 @@ namespace piton
 {
     public class SnakeDraw
     {
-        private readonly int _gridSize;
+        private readonly Sides _sides;
 
         public SnakeDraw(int gridSize)
         {
-            _gridSize = gridSize;
+            _sides = new Sides(gridSize);
         }
 
         private (int, int) tail = (0, 0);
@@ -22,12 +22,12 @@ namespace piton
         private (int, int) head = (2, 0);
         private (int, int) food = (3, 0);
 
-        public (int x, int y) GetSprite(List<int> snake, int index)
+        public (int x, int y) GetSprite(int[] snake, int index)
         {
-            if (index < 0 || index >= snake.Count)
+            if (index < 0 || index >= snake.Length)
                 throw new ArgumentOutOfRangeException("index");
             var (isHead, isTail, fromLeft, toRight, fromRight, toLeft, fromTop, toBottom, fromBottom, toTop) =
-                GetSides(snake, index);
+                _sides.GetSides(snake, index);
             if (isHead)
                 return head;
             if (isTail)
@@ -46,12 +46,12 @@ namespace piton
             throw new ArgumentOutOfRangeException("index");
         }
 
-        public int GetRotation(List<int> snake, int index)
+        public int GetRotation(int[] snake, int index)
         {
-            if (index < 0 || index >= snake.Count)
+            if (index < 0 || index >= snake.Length)
                 throw new ArgumentOutOfRangeException("index");
             var (isHead, isTail, fromLeft, toRight, fromRight, toLeft, fromTop, toBottom, fromBottom, toTop) =
-                GetSides(snake, index);
+                _sides.GetSides(snake, index);
             if (isHead)
             {
                 if (fromLeft) return 0;
@@ -69,59 +69,6 @@ namespace piton
             }
 
             return 0;
-        }
-
-        private (
-            bool isHead,
-            bool isTail,
-            bool fromLeft,
-            bool toRight,
-            bool fromRight,
-            bool toLeft,
-            bool fromTop,
-            bool toBottom,
-            bool fromBottom,
-            bool toTop
-            ) GetSides(List<int> snake, int index)
-        {
-            if (index == 0)
-                return (
-                    true,
-                    false,
-                    snake[0] - 1 == snake[1],
-                    false,
-                    snake[0] + 1 == snake[1],
-                    false,
-                    snake[0] - _gridSize == snake[1],
-                    false,
-                    snake[0] + _gridSize == snake[1],
-                    false
-                );
-            if (index == snake.Count - 1)
-                return (
-                    false,
-                    true,
-                    false,
-                    snake[index] + 1 == snake[index - 1],
-                    false,
-                    snake[index] - 1 == snake[index - 1],
-                    false,
-                    snake[index] + _gridSize == snake[index - 1],
-                    false,
-                    snake[index] - _gridSize == snake[index - 1]
-                );
-            return (
-                false,
-                false,
-                snake[index] - 1 == snake[index + 1],
-                snake[index] + 1 == snake[index - 1],
-                snake[index] + 1 == snake[index + 1],
-                snake[index] - 1 == snake[index - 1],
-                snake[index] - _gridSize == snake[index + 1],
-                snake[index] + _gridSize == snake[index - 1],
-                snake[index] + _gridSize == snake[index + 1],
-                snake[index] - _gridSize == snake[index - 1]
-            );
         }
     }
 }

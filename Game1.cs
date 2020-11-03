@@ -20,8 +20,10 @@ namespace piton
 
         private int _timer;
         private readonly (int, int) _grass = (4, 0);
-        private readonly List<int> _snake;
+        private int[] _snake;
         private readonly SnakeDraw _snakeDraw = new SnakeDraw(GridSize);
+        private readonly ProcessInput _processInput = new ProcessInput();
+        private readonly GameLogic _gameLogic = new GameLogic(GridSize);
 
 
         public Game1()
@@ -30,8 +32,11 @@ namespace piton
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            _snake = new List<int>
+            _snake = new []
             {
+                GridSize * 4 + 7,
+                GridSize * 4 + 6,
+                GridSize * 4 + 5,
                 GridSize * 4 + 4,
                 GridSize * 4 + 3,
                 GridSize * 4 + 2,
@@ -65,10 +70,23 @@ namespace piton
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            
+            _processInput.BatchInput();
 
-            // TODO: Add your update logic here
+            _timer += gameTime.ElapsedGameTime.Milliseconds;
+            if (_timer > UpdateInterval)
+            {
+                _timer -= UpdateInterval;
+                FixedUpdate();
+            }
 
             base.Update(gameTime);
+        }
+
+        private void FixedUpdate()
+        {
+            var keys = _processInput.CollectInput();
+            _snake = _gameLogic.MoveSnake(keys, _snake.ToArray());
         }
 
         protected override void Draw(GameTime gameTime)
@@ -80,7 +98,7 @@ namespace piton
                 // ReSharper disable once PossibleLossOfFraction
                 DrawTile(new Vector2(i % GridSize, i / GridSize), _grass);
 
-            for (var i = 0; i < _snake.Count; i++)
+            for (var i = 0; i < _snake.Length; i++)
                 // ReSharper disable once PossibleLossOfFraction
                 DrawTile(new Vector2(_snake[i] % GridSize, _snake[i] / GridSize),
                     _snakeDraw.GetSprite(_snake, i), _snakeDraw.GetRotation(_snake, i) * (float) Math.PI / 2);
