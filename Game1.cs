@@ -16,7 +16,7 @@ namespace piton
         private const int TextureSize = 384;
         private const int TileSize = 32;
         private const int GridSize = 30;
-        private const int UpdateInterval = 200;
+        private const int UpdateInterval = 2000;
 
         private int _timer;
         private readonly (int, int) _grass = (4, 0);
@@ -86,7 +86,8 @@ namespace piton
         private void FixedUpdate()
         {
             var keys = _processInput.CollectInput();
-            _snake = _gameLogic.MoveSnake(keys, _snake.ToArray());
+            _snake = _gameLogic.MoveSnake(keys, _snake.ToArray(), out var unusedKeys);
+            _processInput.ReturnUnusedKeys(unusedKeys);
         }
 
         protected override void Draw(GameTime gameTime)

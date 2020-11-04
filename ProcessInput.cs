@@ -25,5 +25,10 @@ namespace piton
             _batchedKeys.Clear();
             return keys;
         }
+
+        public void ReturnUnusedKeys(Keys[] unusedKeys)
+        {
+            _batchedKeys.InsertRange(0, unusedKeys);
+        }
     }
 }
