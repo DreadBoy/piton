@@ -20,8 +20,11 @@ namespace piton
 
         private int _timer;
         private readonly (int, int) _grass = (4, 0);
+        private int[] _trail;
         private int[] _snake;
         private int _food;
+        // TODO food should disappear after timeout
+        // TODO what about multiple foods?
         private readonly SnakeDraw _snakeDraw = new SnakeDraw(GridSize);
         private readonly ProcessInput _processInput = new ProcessInput();
         private readonly GameLogic _gameLogic = new GameLogic(GridSize);
@@ -33,6 +36,7 @@ namespace piton
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
+            _trail = new int[0];
             _snake = new[]
             {
                 GridSize * 4 + 7,
@@ -88,13 +92,18 @@ namespace piton
         private void FixedUpdate()
         {
             var keys = _processInput.CollectInput();
-            _snake = _gameLogic.MoveSnake(keys, _snake.ToArray(), out var unusedKeys);
+            var (snake, unusedKeys, trail) = _gameLogic.MoveSnake(keys, _snake, _trail);
+            _snake = snake;
+            _trail = trail;
             _processInput.ReturnUnusedKeys(unusedKeys);
 
             _food = _gameLogic.EatFood(_food, _snake);
 
             if (_food == -1)
+            {
+                (_snake, _trail) = _gameLogic.LengthenSnake(_snake, _trail);
                 _food = _gameLogic.SpawnFood(_snake);
+            }
         }
 
         protected override void Draw(GameTime gameTime)

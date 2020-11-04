@@ -19,9 +19,9 @@ namespace piton
             _random = new Random();
         }
 
-        public int[] MoveSnake(Keys[] keys, int[] snake, out Keys[] unusedKeys)
+        public (int[] snake, Keys[] unusedKeys, int[] trail) MoveSnake(Keys[] keys, int[] snake, int[] trail)
         {
-            unusedKeys = new Keys[0];
+            var unusedKeys = new Keys[0];
             var (_, _, fromLeft, _, fromRight, _, fromTop, _, fromBottom, _) =
                 _sides.GetSides(snake, 0);
 
@@ -66,6 +66,7 @@ namespace piton
                 break;
             }
 
+            var lastPiece = snake.Last();
             // Complete movement
             for (var i = snake.Length - 1; i >= 1; i--)
             {
@@ -73,7 +74,9 @@ namespace piton
             }
 
             snake[0] = newHead;
-            return snake;
+
+            // TODO should you really limit trail to 10?
+            return (snake, unusedKeys, new[] {lastPiece}.Concat(trail).Take(10).ToArray());
         }
 
         public int SpawnFood(int[] snake)
@@ -95,6 +98,13 @@ namespace piton
         {
             if (food == snake[0]) return -1;
             return food;
+        }
+
+        public (int[] snake, int[] trail) LengthenSnake(int[] snake, int[] trail)
+        {
+            if (trail.Length < 1)
+                return (snake, trail);
+            return (snake.Append(trail.First()).ToArray(), trail.Skip(1).ToArray());
         }
     }
 }
