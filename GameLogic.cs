@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
@@ -9,11 +10,13 @@ namespace piton
     {
         private readonly int _gridSize;
         private readonly Sides _sides;
+        private readonly Random _random;
 
         public GameLogic(int gridSize)
         {
             _gridSize = gridSize;
             _sides = new Sides(gridSize);
+            _random = new Random();
         }
 
         public int[] MoveSnake(Keys[] keys, int[] snake, out Keys[] unusedKeys)
@@ -71,6 +74,27 @@ namespace piton
 
             snake[0] = newHead;
             return snake;
+        }
+
+        public int SpawnFood(int[] snake)
+        {
+            var stillEmpty = Enumerable.Range(0, _gridSize * _gridSize).ToList();
+            while (stillEmpty.Count > 0)
+            {
+                var emptyIndex = _random.Next(0, stillEmpty.Count);
+                if (snake.Contains(stillEmpty[emptyIndex]))
+                    stillEmpty.RemoveAt(emptyIndex);
+                else
+                    return stillEmpty[emptyIndex];
+            }
+
+            return -2;
+        }
+
+        public int EatFood(int food, int[] snake)
+        {
+            if (food == snake[0]) return -1;
+            return food;
         }
     }
 }

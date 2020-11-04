@@ -13,14 +13,14 @@ namespace piton
             _sides = new Sides(gridSize);
         }
 
-        private (int, int) tail = (0, 0);
-        private (int, int) middle = (1, 0);
-        private (int, int) cornerBR = (0, 1);
-        private (int, int) cornerBL = (1, 1);
-        private (int, int) cornerTR = (2, 1);
-        private (int, int) cornerTL = (3, 1);
-        private (int, int) head = (2, 0);
-        private (int, int) food = (3, 0);
+        public (int, int) tail = (0, 0);
+        public (int, int) middle = (1, 0);
+        public (int, int) cornerBR = (0, 1);
+        public (int, int) cornerBL = (1, 1);
+        public (int, int) cornerTR = (2, 1);
+        public (int, int) cornerTL = (3, 1);
+        public (int, int) head = (2, 0);
+        public (int, int) food = (3, 0);
 
         public (int x, int y) GetSprite(int[] snake, int index)
         {

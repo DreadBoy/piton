@@ -16,11 +16,12 @@ namespace piton
         private const int TextureSize = 384;
         private const int TileSize = 32;
         private const int GridSize = 30;
-        private const int UpdateInterval = 2000;
+        private const int UpdateInterval = 50;
 
         private int _timer;
         private readonly (int, int) _grass = (4, 0);
         private int[] _snake;
+        private int _food;
         private readonly SnakeDraw _snakeDraw = new SnakeDraw(GridSize);
         private readonly ProcessInput _processInput = new ProcessInput();
         private readonly GameLogic _gameLogic = new GameLogic(GridSize);
@@ -32,7 +33,7 @@ namespace piton
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            _snake = new []
+            _snake = new[]
             {
                 GridSize * 4 + 7,
                 GridSize * 4 + 6,
@@ -46,6 +47,7 @@ namespace piton
                 GridSize + 1,
                 GridSize,
             };
+            _food = _gameLogic.SpawnFood(_snake);
         }
 
         protected override void Initialize()
@@ -70,7 +72,7 @@ namespace piton
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
+
             _processInput.BatchInput();
 
             _timer += gameTime.ElapsedGameTime.Milliseconds;
@@ -88,6 +90,11 @@ namespace piton
             var keys = _processInput.CollectInput();
             _snake = _gameLogic.MoveSnake(keys, _snake.ToArray(), out var unusedKeys);
             _processInput.ReturnUnusedKeys(unusedKeys);
+
+            _food = _gameLogic.EatFood(_food, _snake);
+
+            if (_food == -1)
+                _food = _gameLogic.SpawnFood(_snake);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -98,6 +105,10 @@ namespace piton
             for (var i = 0; i < GridSize * GridSize; i++)
                 // ReSharper disable once PossibleLossOfFraction
                 DrawTile(new Vector2(i % GridSize, i / GridSize), _grass);
+
+            // ReSharper disable once PossibleLossOfFraction
+            if (_food >= 0)
+                DrawTile(new Vector2(_food % GridSize, _food / GridSize), _snakeDraw.food);
 
             for (var i = 0; i < _snake.Length; i++)
                 // ReSharper disable once PossibleLossOfFraction
