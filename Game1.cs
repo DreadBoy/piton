@@ -12,6 +12,7 @@ namespace piton
         private Texture2D _spritesheet;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private Effect _allWhiteEffect;
 
         private const int TextureSize = 384;
         private const int TileSize = 32;
@@ -25,7 +26,7 @@ namespace piton
         private int _food;
         // TODO food should disappear after timeout
         // TODO what about multiple foods?
-        private readonly SnakeDraw _snakeDraw = new SnakeDraw(GridSize);
+        private Draw _draw;
         private readonly ProcessInput _processInput = new ProcessInput();
         private readonly GameLogic _gameLogic = new GameLogic(GridSize);
 
@@ -67,8 +68,10 @@ namespace piton
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
             _spritesheet = Content.Load<Texture2D>("Textures");
+            _allWhiteEffect = Content.Load<Effect>("AllWhite");
+
+            _draw = new Draw(_spriteBatch, _spritesheet, GridSize, TextureSize, TileSize);
         }
 
         protected override void Update(GameTime gameTime)
@@ -110,29 +113,24 @@ namespace piton
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
+            _draw.Begin();
             for (var i = 0; i < GridSize * GridSize; i++)
                 // ReSharper disable once PossibleLossOfFraction
-                DrawTile(new Vector2(i % GridSize, i / GridSize), _grass);
-
+                _draw.DrawTile(new Vector2(i % GridSize, i / GridSize), _grass);
+            
             // ReSharper disable once PossibleLossOfFraction
             if (_food >= 0)
-                DrawTile(new Vector2(_food % GridSize, _food / GridSize), _snakeDraw.food);
-
+                _draw.DrawTile(new Vector2(_food % GridSize, _food / GridSize), _draw.food);
+            
             for (var i = 0; i < _snake.Length; i++)
                 // ReSharper disable once PossibleLossOfFraction
-                DrawTile(new Vector2(_snake[i] % GridSize, _snake[i] / GridSize),
-                    _snakeDraw.GetSprite(_snake, i), _snakeDraw.GetRotation(_snake, i) * (float) Math.PI / 2);
-            _spriteBatch.End();
-            base.Draw(gameTime);
-        }
+                _draw.DrawTile(new Vector2(_snake[i] % GridSize, _snake[i] / GridSize),
+                    _draw.GetSprite(_snake, i), _draw.GetRotation(_snake, i) * (float) Math.PI / 2);
 
-        private void DrawTile(Vector2 position, (int x, int y) source, float rotation = 0)
-        {
-            _spriteBatch.Draw(_spritesheet, position * TileSize + Vector2.One * TileSize * 0.5f,
-                new Rectangle(TextureSize * source.x, 385 * source.y, TextureSize, TextureSize),
-                Color.White, rotation, Vector2.One * 0.5f * TextureSize, Vector2.One / TextureSize * TileSize,
-                SpriteEffects.None, 0);
+            // _draw.DrawTile(new Vector2(2, 2), _draw.food, effect: _allWhiteEffect);
+            
+            _draw.End();
+            base.Draw(gameTime);
         }
     }
 }

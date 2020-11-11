@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin AlLWhite.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:AlLWhite.fx
+
 #begin LoseScreen.png
 /importer:TextureImporter
 /processor:TextureProcessor

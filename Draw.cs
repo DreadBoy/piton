@@ -1,16 +1,24 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace piton
 {
-    public class SnakeDraw
+    public class Draw
     {
         private readonly Sides _sides;
+        private readonly int _textureSize;
+        private readonly int _tileSize;
+        private readonly SpriteBatch _spriteBatch;
+        private readonly Texture2D _spritesheet;
 
-        public SnakeDraw(int gridSize)
+        public Draw(SpriteBatch spriteBatch, Texture2D spritesheet, int gridSize, int textureSize, int tileSize)
         {
             _sides = new Sides(gridSize);
+            _textureSize = textureSize;
+            _tileSize = tileSize;
+            _spritesheet = spritesheet;
+            _spriteBatch = spriteBatch;
         }
 
         public (int, int) tail = (0, 0);
@@ -69,6 +77,39 @@ namespace piton
             }
 
             return 0;
+        }
+
+        private Effect _currentEffect;
+
+        public void Begin()
+        {
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            _currentEffect = null;
+        }
+
+        public void End()
+        {
+            _spriteBatch.End();
+        }
+
+        public void DrawTile(Vector2 position, (int x, int y) source, float rotation = 0, Effect effect = null)
+        {
+            if (effect != _currentEffect)
+            {
+                _currentEffect = effect;
+                _spriteBatch.End();
+                _spriteBatch.Begin(
+                    SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    effect: _currentEffect
+                );
+            }
+
+            _spriteBatch.Draw(_spritesheet, position * _tileSize + Vector2.One * _tileSize * 0.5f,
+                new Rectangle(_textureSize * source.x, 385 * source.y, _textureSize, _textureSize),
+                Color.White, rotation, Vector2.One * 0.5f * _textureSize, Vector2.One / _textureSize * _tileSize,
+                SpriteEffects.None, 0);
         }
     }
 }
